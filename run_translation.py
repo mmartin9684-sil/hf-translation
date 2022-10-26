@@ -354,6 +354,7 @@ def main():
 
     simple_parser = argparse.ArgumentParser()
     simple_parser.add_argument("--config_file", type=str, help="The JSON config file.")
+    simple_parser.add_argument("--extra_tokens", type=str, default=None, help="File of extra tokens for the tokenizer")
     simple_parser.add_argument("--do_train", default=False, action="store_true", help="Whether to run training.")
     simple_parser.add_argument("--do_eval", default=False, action="store_true", help="Whether to run eval on the dev set.")
     simple_parser.add_argument("--do_predict", default=False, action="store_true", help="Whether to run predictions on the test set.")
@@ -377,6 +378,12 @@ def main():
         config_url = conform_url(args.config_file)
     else:
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+
+    extra_tokens = None
+    if args.extra_tokens is not None:
+        tokens_path = StorageManager.get_local_copy(args.extra_tokens, force_download=True)
+        with open(tokens_path, 'r', encoding='utf-8') as t:
+            extra_tokens = [chr(int(d)) for d in t.read().splitlines()]
 
     training_args.do_train = args.do_train
     training_args.do_eval = args.do_eval
@@ -558,10 +565,15 @@ def main():
                 tokenizer.lang_token_to_id[lang_code] = lang_id
                 tokenizer.id_to_lang_token[lang_id] = lang_code
 
-
         if model_args.add_new_lang_code and isinstance(tokenizer, tuple(MULTILINGUAL_TOKENIZERS)):
             add_lang_code_to_tokenizer(tokenizer, data_args.source_lang)
             add_lang_code_to_tokenizer(tokenizer, data_args.target_lang)
+
+        if extra_tokens is not None:
+            # Drop any extra tokens that are already in the tokenizer's vocab
+            extra_tokens = set(extra_tokens) - set(tokenizer.vocab.keys())
+            # Add the extra tokens to the vocab
+            tokenizer.add_tokens(list(extra_tokens))
 
         model.resize_token_embeddings(len(tokenizer))
 
