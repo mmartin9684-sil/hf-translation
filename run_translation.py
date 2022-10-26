@@ -382,7 +382,7 @@ def main():
     extra_tokens = None
     if args.extra_tokens is not None:
         tokens_path = StorageManager.get_local_copy(args.extra_tokens, force_download=True)
-        with tokens_path.open('r', encoding='utf-8') as t:
+        with open(tokens_path, 'r', encoding='utf-8') as t:
             extra_tokens = [chr(int(d)) for d in t.read().splitlines()]
 
     training_args.do_train = args.do_train
