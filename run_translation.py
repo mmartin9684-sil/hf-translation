@@ -326,6 +326,12 @@ class DataTrainingArguments:
     delete_checkpoints_at_end: Optional[bool] = field(
         default=False, metadata={"help": "Whether to delete checkpoints at end of training."}
     )
+    top_k: Optional[int] = field(
+        default=None, metadata={"help": "Number of samples in the sampling pool"}
+    )
+    top_p: Optional[float] = field(
+        default=None, metadata={"help": "Percentage of samples in the sampling pool"}
+    )
 
     def __post_init__(self):
         if self.dataset_name is None and self.train_file is None and self.validation_file is None:
@@ -799,8 +805,8 @@ def main():
             else data_args.val_max_target_length
         )
         num_beams = data_args.num_beams if data_args.num_beams is not None else training_args.generation_num_beams
-        top_k = training_args.top_k if training_args.top_k is not None else None
-        top_p = training_args.top_p if training_args.top_p is not None else None
+        top_k = data_args.top_k if data_args.top_k is not None else None
+        top_p = data_args.top_p if data_args.top_p is not None else None
         print(f'num_beams: {num_beams}, top_k: {top_k}, top_p: {top_p}')
 
         if training_args.do_eval:
