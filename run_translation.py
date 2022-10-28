@@ -674,6 +674,7 @@ def main():
                     load_from_cache_file=not data_args.overwrite_cache,
                     desc="Running tokenizer on train dataset",
                 )
+            train_dataset.save_to_disk('datasets/train')
 
         if training_args.do_eval:
             max_target_length = data_args.val_max_target_length
@@ -692,6 +693,7 @@ def main():
                     load_from_cache_file=not data_args.overwrite_cache,
                     desc="Running tokenizer on validation dataset",
                 )
+            eval_dataset.save_to_disk('datasets/eval')
 
         if training_args.do_predict:
             max_target_length = data_args.val_max_target_length
@@ -710,6 +712,7 @@ def main():
                     load_from_cache_file=not data_args.overwrite_cache,
                     desc="Running tokenizer on prediction dataset",
                 )
+            predict_dataset.save_to_disk('datasets/predict')
 
         # Data collator
         label_pad_token_id = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
